@@ -1,17 +1,63 @@
 import json
+import random
+import string
+from datetime import datetime
+from getpass import getpass
+
+
+# Function to Generate Strong Password
+def generate_password():
+
+    length = 12
+
+    characters = string.ascii_letters + string.digits + string.punctuation
+
+    password = ''.join(random.choice(characters) for i in range(length))
+
+    return password
+
+
+# Function to Check Password Strength
+def check_password_strength(password):
+
+    if len(password) < 6:
+        return "Weak"
+
+    elif len(password) < 10:
+        return "Medium"
+
+    else:
+        return "Strong"
 
 
 # Function to Add Password
 def add_password():
 
     website = input("Enter Website Name: ")
+
+    if website == "":
+        print("Website name cannot be empty")
+        return
+
     username = input("Enter Username: ")
-    password = input("Enter Password: ")
+
+    choice = input("Generate Strong Password? (yes/no): ")
+
+    if choice.lower() == "yes":
+        password = generate_password()
+        print("Generated Password:", password)
+
+    else:
+        password = getpass("Enter Password: ")
+
+    strength = check_password_strength(password)
 
     data = {
         "website": website,
         "username": username,
-        "password": password
+        "password": password,
+        "strength": strength,
+        "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     }
 
     try:
@@ -27,6 +73,7 @@ def add_password():
         json.dump(passwords, file, indent=4)
 
     print("Password Saved Successfully")
+    print("Password Strength:", strength)
 
 
 # Function to View Passwords
@@ -40,6 +87,7 @@ def view_passwords():
                 print("No passwords stored")
 
             else:
+
                 print("\n===== SAVED PASSWORDS =====\n")
 
                 for item in passwords:
@@ -47,7 +95,11 @@ def view_passwords():
                     print("Website :", item["website"])
                     print("Username:", item["username"])
                     print("Password:", item["password"])
+                    print("Strength:", item["strength"])
+                    print("Created :", item["created_at"])
                     print("----------------------------")
+
+                print("Total Passwords Stored:", len(passwords))
 
     except:
         print("No password file found")
@@ -73,6 +125,8 @@ def search_password():
                     print("Website :", item["website"])
                     print("Username:", item["username"])
                     print("Password:", item["password"])
+                    print("Strength:", item["strength"])
+                    print("Created :", item["created_at"])
 
                     found = True
                     break
@@ -103,7 +157,11 @@ def update_password():
                     print("Current Password:", item["password"])
 
                     item["username"] = input("Enter New Username: ")
-                    item["password"] = input("Enter New Password: ")
+
+                    new_password = getpass("Enter New Password: ")
+
+                    item["password"] = new_password
+                    item["strength"] = check_password_strength(new_password)
 
                     found = True
                     break
@@ -156,6 +214,20 @@ def delete_password():
         print("No password file found")
 
 
+# Function to Display Statistics
+def password_statistics():
+
+    try:
+        with open("passwords.json", "r") as file:
+            passwords = json.load(file)
+
+            print("\n===== PASSWORD STATISTICS =====")
+            print("Total Passwords Stored:", len(passwords))
+
+    except:
+        print("No password file found")
+
+
 # Main Menu
 while True:
 
@@ -165,7 +237,8 @@ while True:
     print("3. Search Password")
     print("4. Update Password")
     print("5. Delete Password")
-    print("6. Exit")
+    print("6. Password Statistics")
+    print("7. Exit")
 
     choice = input("Enter your choice: ")
 
@@ -185,6 +258,9 @@ while True:
         delete_password()
 
     elif choice == "6":
+        password_statistics()
+
+    elif choice == "7":
         print("Exiting Program...")
         break
 
